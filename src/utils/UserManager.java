@@ -46,7 +46,7 @@ public class UserManager {
     
     public User login(String username, String password) {
         String userSql = "SELECT id, username, password, coins FROM users WHERE username = ? AND password = ?";
-        String horseSql = "SELECT name, color, speed, stamina, acceleration, level FROM horses WHERE user_id = ?";
+        String horseSql = "SELECT name, speed, stamina, acceleration, level FROM horses WHERE user_id = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement userStmt = conn.prepareStatement(userSql)) {
@@ -72,13 +72,12 @@ public class UserManager {
                     
                     if (horseRs.next()) {
                         String horseName = horseRs.getString("name");
-                        String color = horseRs.getString("color");
                         int speed = horseRs.getInt("speed");
                         int stamina = horseRs.getInt("stamina");
                         int acceleration = horseRs.getInt("acceleration");
                         int level = horseRs.getInt("level");
                         
-                        Horse horse = new Horse(horseName, color);
+                        Horse horse = new Horse(horseName);
                         horse.setSpeed(speed);
                         horse.setStamina(stamina);
                         horse.setAcceleration(acceleration);
@@ -102,7 +101,7 @@ public class UserManager {
     public void updateUser(User user) {
         String updateUserSql = "UPDATE users SET coins = ? WHERE id = ?";
         String updateHorseSql = "UPDATE horses SET speed = ?, stamina = ?, acceleration = ?, level = ? WHERE user_id = ?";
-        String insertHorseSql = "INSERT INTO horses (user_id, name, color, speed, stamina, acceleration, level) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String insertHorseSql = "INSERT INTO horses (user_id, name, speed, stamina, acceleration, level) VALUES (?, ?, ?, ?, ?, ?)";
         String checkHorseSql = "SELECT id FROM horses WHERE user_id = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
@@ -137,11 +136,10 @@ public class UserManager {
                         try (PreparedStatement insertHorseStmt = conn.prepareStatement(insertHorseSql)) {
                             insertHorseStmt.setInt(1, user.getUserId());
                             insertHorseStmt.setString(2, horse.getName());
-                            insertHorseStmt.setString(3, horse.getColor());
-                            insertHorseStmt.setInt(4, horse.getSpeed());
-                            insertHorseStmt.setInt(5, horse.getStamina());
-                            insertHorseStmt.setInt(6, horse.getAcceleration());
-                            insertHorseStmt.setInt(7, horse.getLevel());
+                            insertHorseStmt.setInt(3, horse.getSpeed());
+                            insertHorseStmt.setInt(4, horse.getStamina());
+                            insertHorseStmt.setInt(5, horse.getAcceleration());
+                            insertHorseStmt.setInt(6, horse.getLevel());
                             insertHorseStmt.executeUpdate();
                         }
                     }

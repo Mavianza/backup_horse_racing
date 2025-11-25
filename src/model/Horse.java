@@ -6,15 +6,13 @@ public class Horse implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private String name;
-    private String color;
     private int speed;
     private int stamina;
     private int acceleration;
     private int level;
     
-    public Horse(String name, String color) {
+    public Horse(String name) {
         this.name = name;
-        this.color = color;
         this.speed = 50;
         this.stamina = 50;
         this.acceleration = 50;
@@ -23,10 +21,6 @@ public class Horse implements Serializable {
     
     public String getName() {
         return name;
-    }
-    
-    public String getColor() {
-        return color;
     }
     
     public int getSpeed() {

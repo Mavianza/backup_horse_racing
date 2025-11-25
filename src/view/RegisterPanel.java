@@ -63,12 +63,6 @@ public class RegisterPanel extends JPanel {
                 // Inner lighter brown panel
                 g2d.setColor(new Color(120, 81, 45));
                 g2d.fillRoundRect(15, 15, getWidth()-30, getHeight()-30, 20, 20);
-                
-                // Golden decorative border
-                g2d.setColor(new Color(218, 165, 32));
-                g2d.setStroke(new BasicStroke(3));
-                g2d.drawRoundRect(10, 10, getWidth()-20, getHeight()-20, 25, 25);
-                g2d.drawRoundRect(18, 18, getWidth()-36, getHeight()-36, 18, 18);
             }
         };
         contentPanel.setOpaque(false);
@@ -233,11 +227,6 @@ public class RegisterPanel extends JPanel {
                     g2d.setColor(baseColor);
                 }
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
-                
-                // Golden border
-                g2d.setColor(new Color(218, 165, 32));
-                g2d.setStroke(new BasicStroke(2));
-                g2d.drawRoundRect(1, 1, getWidth()-3, getHeight()-3, 20, 20);
                 
                 super.paintComponent(g);
             }

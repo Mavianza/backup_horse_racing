@@ -35,8 +35,8 @@ public class HorseAssets {
         return horseBaseImage;
     }
     
-    // Create horse image with color tinting
-    public static BufferedImage createHorseImage(Color color, int width, int height) {
+    // Create horse image without color tinting
+    public static BufferedImage createHorseImage(int width, int height) {
         BufferedImage baseImage = loadHorseImage();
         
         // Scale image to desired size
@@ -49,10 +49,7 @@ public class HorseAssets {
         g2d.drawImage(baseImage, 0, 0, width, height, null);
         g2d.dispose();
         
-        // Apply color tint
-        BufferedImage tintedImage = applyColorTint(scaledImage, color);
-        
-        return tintedImage;
+        return scaledImage;
     }
     
     // Apply color tint to image

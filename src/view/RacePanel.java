@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 import model.RaceHorse;
 import model.User;
 import model.RaceHistory;
@@ -20,6 +21,7 @@ public class RacePanel extends JPanel {
     
     private List<RaceHorse> horses;
     private List<Thread> raceThreads;
+    private List<Integer> laneMappings; // Maps horse index to lane number
     private JPanel trackPanel;
     private JButton startButton;
     private JButton backButton;
@@ -27,20 +29,13 @@ public class RacePanel extends JPanel {
     private List<RaceHorse> finishOrder;
     
     private String[] horseNames = {"Thunder", "Lightning", "Storm", "Blaze", "Shadow"};
-    private String[] colors = {"Red", "Orange", "Green", "Blue", "Purple"};
-    private Color[] colorValues = {
-        new Color(220, 20, 60),
-        new Color(255, 140, 0),
-        new Color(34, 139, 34),
-        new Color(30, 144, 255),
-        new Color(138, 43, 226)
-    };
     
     public RacePanel(GameFrame gameFrame, UserManager userManager) {
         this.gameFrame = gameFrame;
         this.userManager = userManager;
         this.horses = new ArrayList<>();
         this.raceThreads = new ArrayList<>();
+        this.laneMappings = new ArrayList<>();
         this.finishOrder = new ArrayList<>();
         this.raceInProgress = false;
         
@@ -128,12 +123,59 @@ public class RacePanel extends JPanel {
                         10, NUM_COMPETITORS * LANE_HEIGHT / 10);
         }
         
+        // Draw finish rankings next to finish line
+        g2d.setFont(new Font("Serif", Font.BOLD, 20));
+        synchronized (finishOrder) {
+            for (int i = 0; i < finishOrder.size(); i++) {
+                RaceHorse finishedHorse = finishOrder.get(i);
+                int horseIndex = horses.indexOf(finishedHorse);
+                if (horseIndex != -1) {
+                    int laneNumber = laneMappings.get(horseIndex);
+                    int y = laneNumber * LANE_HEIGHT + 25 + LANE_HEIGHT / 2 + 5;
+                    
+                    // Draw ranking text with outline
+                    String rankText = getRankingSuffix(i + 1);
+                    
+                    // Black outline
+                    g2d.setColor(Color.BLACK);
+                    for (int dx = -2; dx <= 2; dx++) {
+                        for (int dy = -2; dy <= 2; dy++) {
+                            if (dx != 0 || dy != 0) {
+                                g2d.drawString(rankText, TRACK_LENGTH + 120 + dx, y + dy);
+                            }
+                        }
+                    }
+                    
+                    // Gold color for ranking
+                    if (i == 0) {
+                        g2d.setColor(new Color(255, 215, 0)); // Gold
+                    } else if (i == 1) {
+                        g2d.setColor(new Color(192, 192, 192)); // Silver
+                    } else if (i == 2) {
+                        g2d.setColor(new Color(205, 127, 50)); // Bronze
+                    } else {
+                        g2d.setColor(Color.WHITE);
+                    }
+                    g2d.drawString(rankText, TRACK_LENGTH + 120, y);
+                }
+            }
+        }
+        
         // Draw lane numbers
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font("roboto", Font.BOLD, 14));
         for (int i = 0; i < NUM_COMPETITORS; i++) {
             int y = i * LANE_HEIGHT + 25 + LANE_HEIGHT / 2;
             g2d.drawString("Lane " + (i + 1), 5, y);
+        }
+    }
+    
+    private String getRankingSuffix(int position) {
+        switch (position) {
+            case 1: return "1st";
+            case 2: return "2nd";
+            case 3: return "3rd";
+            default: return position + "th";
         }
     }
     
@@ -146,13 +188,12 @@ public class RacePanel extends JPanel {
         for (int i = 0; i < horses.size(); i++) {
             RaceHorse horse = horses.get(i);
             int x = 50 + horse.getPosition();
-            int y = i * LANE_HEIGHT + 25 + 20;
-            
-            // Get horse color
-            Color horseColor = getColorForHorse(horse.getColor());
+            // Use lane mapping for y position
+            int laneNumber = laneMappings.get(i);
+            int y = laneNumber * LANE_HEIGHT + 25 + 20;
             
             // Draw horse image using HorseAssets
-            BufferedImage horseImage = HorseAssets.createHorseImage(horseColor, 60, 50);
+            BufferedImage horseImage = HorseAssets.createHorseImage(60, 50);
             g2d.drawImage(horseImage, x, y - 10, null);
             
             // Draw name
@@ -168,26 +209,18 @@ public class RacePanel extends JPanel {
         }
     }
     
-    private Color getColorForHorse(String colorName) {
-        for (int i = 0; i < colors.length; i++) {
-            if (colors[i].equals(colorName)) {
-                return colorValues[i];
-            }
-        }
-        return Color.GRAY;
-    }
-    
     public void initializeRace() {
         horses.clear();
         raceThreads.clear();
         finishOrder.clear();
+        laneMappings.clear();
         
         User currentUser = gameFrame.getCurrentUser();
         
         // Add player's horse
         horses.add(new RaceHorse(
             currentUser.getHorse().getName(),
-            currentUser.getHorse().getColor(),
+            "",
             currentUser.getHorse().calculateRaceSpeed(),
             true
         ));
@@ -197,11 +230,17 @@ public class RacePanel extends JPanel {
             int randomSpeed = 40 + (int)(Math.random() * 40); // Speed 40-80
             horses.add(new RaceHorse(
                 horseNames[i],
-                colors[i],
+                "",
                 randomSpeed,
                 false
             ));
         }
+        
+        // Randomize lane assignments
+        for (int i = 0; i < NUM_COMPETITORS; i++) {
+            laneMappings.add(i);
+        }
+        Collections.shuffle(laneMappings);
         
         trackPanel.repaint();
     }
